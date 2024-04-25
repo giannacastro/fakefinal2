@@ -1,0 +1,103 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Taxonomy {
+
+  public enum Domain {
+    EUKARYA(1),
+    BACTERIA(2),
+    ARCHAEA(3);
+
+    private final int value;
+
+    Domain(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+  }
+
+  public enum Kingdom {
+    ANIMALIA(1),
+    FUNGI(2),
+    EUBACTERIA(3),
+    ARCHAEBACTERIA(4);
+
+    private final int value;
+
+    Kingdom(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+  }
+
+  public enum Phylum {
+    CHORDATA(1),
+    ARTHROPODA(2),
+    MOLLUSCA(3),
+    ASCOMYCOTA(4),
+    BASIDIOMYCOTA(5),
+    ZYGOMYCOTA(6),
+    FIRMICUTES(7),
+    PROTEOBACTERIA(8),
+    CRENARCHAEOTA(9),
+    EURYARCHAEOTA(10);
+
+    private final int value;
+
+    Phylum(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+
+    public List<String> getClasses() {
+      List<String> classes = new ArrayList<>();
+      for (Class_ clazz : Class_.values()) {
+        if (clazz.getValue() >= (this.value - 1) * 10 + 1 && clazz.getValue() <= this.value * 10) {
+          classes.add(clazz.name());
+        }
+      }
+      return classes;
+    }
+  }
+
+  public enum Class_ {
+    MAMMALIA(1),
+    INSECTA(2),
+    GASTROPODA(3),
+    ASCOMYCETES(4),
+    BASIDIOMYCETES(5),
+    ZYGOMYCETES(6),
+    BACILLI(7),
+    GAMMAPROTEOBACTERIA(8),
+    THERMOPROTEI(9),
+    METHANOBACTERIA(10);
+
+    private final int value;
+
+    Class_(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+  }
+
+  public String getClassification(String species, Domain domain, Kingdom kingdom, Phylum phylum, Class_ clazz) {
+    String classification = domain.name() + " > " + kingdom.name() + " > " + phylum.name() + " > " + clazz.name() + " > " + species;
+    return classification;
+  }
+
+  public static void main(String[] args) {
+    // No need to populate dropdowns here as it's handled in the GUI
+  }
+}
