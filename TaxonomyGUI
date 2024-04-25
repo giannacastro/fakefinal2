@@ -1,0 +1,197 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class TaxonomyGUI extends JFrame {
+
+    private JComboBox<Domain> domainComboBox;
+    private JComboBox<Kingdom> kingdomComboBox;
+    private JComboBox<Phylum> phylumComboBox;
+    private JComboBox<TaxonomyClass> classComboBox;
+    private JTextField speciesTextField;
+    private JTextArea speciesChartArea;
+
+    private enum Domain {
+        EUKARYA,
+        BACTERIA,
+        ARCHAEA
+    }
+
+    private enum Kingdom {
+        ANIMALIA(Domain.EUKARYA),
+        PLANTAE(Domain.EUKARYA),
+        FUNGI(Domain.EUKARYA),
+        BACTEROIDETES(Domain.BACTERIA),
+        FIRMICUTES(Domain.BACTERIA),
+        PROTEOBACTERIA(Domain.BACTERIA),
+        CRENARCHAEOTA(Domain.ARCHAEA),
+        EURYARCHAEOTA(Domain.ARCHAEA),
+        KORARCHAEOTA(Domain.ARCHAEA);
+
+        private final Domain domain;
+
+        Kingdom(Domain domain) {
+            this.domain = domain;
+        }
+
+        public Domain getDomain() {
+            return domain;
+        }
+    }
+
+    private enum Phylum {
+        CHORDATA(Kingdom.ANIMALIA),
+        ARTHROPODA(Kingdom.ANIMALIA),
+        MOLLUSCA(Kingdom.ANIMALIA),
+        BRYOPHYTES(Kingdom.PLANTAE),
+        ANGIOSPERMS(Kingdom.PLANTAE),
+        GYMNOSPERMS(Kingdom.PLANTAE),
+        ASCOMYCOTA(Kingdom.FUNGI),
+        BASIDIOMYCOTA(Kingdom.FUNGI);
+
+        private final Kingdom kingdom;
+
+        Phylum(Kingdom kingdom) {
+            this.kingdom = kingdom;
+        }
+
+        public Kingdom getKingdom() {
+            return kingdom;
+        }
+    }
+
+    private enum TaxonomyClass {
+        MAMMALIA(Kingdom.ANIMALIA),
+        REPTILIA(Kingdom.ANIMALIA),
+        AVES(Kingdom.ANIMALIA),
+        INSECTA(Kingdom.ANIMALIA),
+        ARACHNIDA(Kingdom.ANIMALIA),
+        CRUSTACEA(Kingdom.ANIMALIA),
+        GASTROPODA(Kingdom.ANIMALIA),
+        BIVALVIA(Kingdom.ANIMALIA),
+        CEPHALOPODA(Kingdom.ANIMALIA),
+        GYMNOSPERMS(Kingdom.PLANTAE),
+        ANGIOSPERMS(Kingdom.PLANTAE),
+        BRYOPHYTES(Kingdom.PLANTAE),
+        ASCOMYCOTA(Kingdom.FUNGI),
+        BASIDIOMYCOTA(Kingdom.FUNGI);
+
+        private final Kingdom kingdom;
+
+        TaxonomyClass(Kingdom kingdom) {
+            this.kingdom = kingdom;
+        }
+
+        public Kingdom getKingdom() {
+            return kingdom;
+        }
+    }
+
+    public TaxonomyGUI() {
+        setTitle("Taxonomy GUI");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        domainComboBox = new JComboBox<>(Domain.values());
+        kingdomComboBox = new JComboBox<>();
+        phylumComboBox = new JComboBox<>();
+        classComboBox = new JComboBox<>();
+        speciesTextField = new JTextField(20);
+        speciesChartArea = new JTextArea(20, 50);
+        speciesChartArea.setEditable(false);
+
+        JButton addButton = new JButton("Add Species");
+        addButton.addActionListener(e -> addSpeciesToChart());
+
+        JButton submitButton = new JButton("Submit");
+        submitButton.addActionListener(e -> organizeOrganisms());
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(new JLabel("Species Name: "));
+        inputPanel.add(speciesTextField);
+        inputPanel.add(new JLabel("Domain: "));
+        inputPanel.add(domainComboBox);
+        inputPanel.add(new JLabel("Kingdom: "));
+        inputPanel.add(kingdomComboBox);
+        inputPanel.add(new JLabel("Phylum: "));
+        inputPanel.add(phylumComboBox);
+        inputPanel.add(new JLabel("Class: "));
+        inputPanel.add(classComboBox);
+        inputPanel.add(addButton);
+        inputPanel.add(submitButton);
+
+        JScrollPane scrollPane = new JScrollPane(speciesChartArea);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(inputPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        add(mainPanel);
+        setVisible(true);
+
+        domainComboBox.addItemListener(e -> {
+            Domain selectedDomain = (Domain) domainComboBox.getSelectedItem();
+            populateKingdomComboBox(selectedDomain);
+        });
+
+        kingdomComboBox.addItemListener(e -> {
+            Kingdom selectedKingdom = (Kingdom) kingdomComboBox.getSelectedItem();
+            populatePhylumComboBox(selectedKingdom);
+        });
+
+        phylumComboBox.addItemListener(e -> {
+            Phylum selectedPhylum = (Phylum) phylumComboBox.getSelectedItem();
+            populateClassComboBox(selectedPhylum);
+        });
+    }
+
+    private void addSpeciesToChart() {
+        String speciesName = speciesTextField.getText();
+        Domain domain = (Domain) domainComboBox.getSelectedItem();
+        Kingdom kingdom = (Kingdom) kingdomComboBox.getSelectedItem();
+        Phylum phylum = (Phylum) phylumComboBox.getSelectedItem();
+        TaxonomyClass taxonomyClass = (TaxonomyClass) classComboBox.getSelectedItem();
+
+        String speciesInfo = String.format("%-20s %-20s %-20s %-20s %-20s\n", speciesName, domain, kingdom, phylum, taxonomyClass);
+        speciesChartArea.append(speciesInfo);
+    }
+
+    private void organizeOrganisms() {
+        String chartContent = speciesChartArea.getText();
+        String[] lines = chartContent.split("\n");
+
+        Arrays.sort(lines, Comparator.comparing(s -> s.substring(s.indexOf(" ") + 1)));
+
+        speciesChartArea.setText("");
+        for (String line : lines) {
+            speciesChartArea.append(line + "\n");
+        }
+    }
+
+    private void populateKingdomComboBox(Domain selectedDomain) {
+        kingdomComboBox.removeAllItems();
+        Arrays.stream(Kingdom.values())
+                .filter(kingdom -> kingdom.getDomain() == selectedDomain)
+                .forEach(kingdomComboBox::addItem);
+    }
+
+    private void populatePhylumComboBox(Kingdom selectedKingdom) {
+        phylumComboBox.removeAllItems();
+        Arrays.stream(Phylum.values())
+                .filter(phylum -> phylum.getKingdom() == selectedKingdom)
+                .forEach(phylumComboBox::addItem);
+    }
+
+    private void populateClassComboBox(Phylum selectedPhylum) {
+        classComboBox.removeAllItems();
+        Arrays.stream(TaxonomyClass.values())
+                .filter(taxonomyClass -> taxonomyClass.getKingdom() == selectedPhylum.getKingdom())
+                .forEach(classComboBox::addItem);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(TaxonomyGUI::new);
+    }
+}
